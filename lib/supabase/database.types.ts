@@ -21,6 +21,7 @@ export type Database = {
           evidence_reference: string | null
           id: string
           member_id: string
+          revision: number
           task_name: string
           team_id: string
           updated_at: string
@@ -33,6 +34,7 @@ export type Database = {
           evidence_reference?: string | null
           id?: string
           member_id: string
+          revision?: number
           task_name: string
           team_id: string
           updated_at?: string
@@ -45,6 +47,7 @@ export type Database = {
           evidence_reference?: string | null
           id?: string
           member_id?: string
+          revision?: number
           task_name?: string
           team_id?: string
           updated_at?: string
@@ -102,6 +105,7 @@ export type Database = {
           decision: string
           id: string
           record_id: string
+          record_revision: number
           reviewer_id: string
           updated_at: string
         }
@@ -111,6 +115,7 @@ export type Database = {
           decision: string
           id?: string
           record_id: string
+          record_revision?: number
           reviewer_id: string
           updated_at?: string
         }
@@ -120,6 +125,7 @@ export type Database = {
           decision?: string
           id?: string
           record_id?: string
+          record_revision?: number
           reviewer_id?: string
           updated_at?: string
         }

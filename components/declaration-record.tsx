@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { AILevelBadge } from "@/components/ai-level-badge";
 import { RecordStatusBadge } from "@/components/record-status-badge";
-import { calculateRecordStatus } from "@/lib/accountability";
+import { calculateRecordStatus, getCurrentReviews } from "@/lib/accountability";
 import type { AIRecordWithReviews, Member } from "@/lib/types";
 
 export function DeclarationRecord({
@@ -16,7 +16,8 @@ export function DeclarationRecord({
 }) {
   const owner = members.find((m) => m.id === record.member_id);
   const status = calculateRecordStatus(record, record.reviews, members);
-  const nonEndorsements = record.reviews.filter(
+  const currentReviews = getCurrentReviews(record, record.reviews);
+  const nonEndorsements = currentReviews.filter(
     (r) => r.decision === "non_endorsed"
   );
 
@@ -66,7 +67,7 @@ export function DeclarationRecord({
             {members
               .filter((m) => m.id !== record.member_id)
               .map((member) => {
-                const review = record.reviews.find(
+                const review = currentReviews.find(
                   (r) => r.reviewer_id === member.id
                 );
                 return (

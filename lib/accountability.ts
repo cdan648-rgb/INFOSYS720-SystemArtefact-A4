@@ -59,12 +59,48 @@ export function getRequiredReviewers(
   return members.filter((member) => member.id !== record.member_id);
 }
 
+/**
+ * Reviews are stamped with the record's revision at the time they were
+ * submitted, so revising a record (bumping ai_records.revision) makes all
+ * prior reviews "history" without deleting them. Only reviews matching the
+ * record's current revision count toward its current status.
+ */
+export function getCurrentReviews(
+  record: AIRecordRow,
+  reviews: ReviewRow[]
+): ReviewRow[] {
+  return reviews.filter((review) => review.record_revision === record.revision);
+}
+
+/**
+ * Reviews from before the record's current revision. Shown as "Previous
+ * review history" — this is a record of past review decisions/comments,
+ * not a full version history of the record's contents (the record itself
+ * is edited in place, so earlier field values are not preserved).
+ */
+export function getReviewHistory(
+  record: AIRecordRow,
+  reviews: ReviewRow[]
+): ReviewRow[] {
+  return reviews
+    .filter((review) => review.record_revision !== record.revision)
+    .sort((a, b) => {
+      if (b.record_revision !== a.record_revision) {
+        return b.record_revision - a.record_revision;
+      }
+      return (
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    });
+}
+
 export function getMissingReviewers(
   record: AIRecordRow,
   reviews: ReviewRow[],
   members: Member[]
 ): Member[] {
-  const reviewedIds = new Set(reviews.map((review) => review.reviewer_id));
+  const currentReviews = getCurrentReviews(record, reviews);
+  const reviewedIds = new Set(currentReviews.map((review) => review.reviewer_id));
   return getRequiredReviewers(record, members).filter(
     (member) => !reviewedIds.has(member.id)
   );
@@ -75,7 +111,9 @@ export function calculateRecordStatus(
   reviews: ReviewRow[],
   members: Member[]
 ): RecordStatus {
-  if (reviews.some((review) => review.decision === "non_endorsed")) {
+  const currentReviews = getCurrentReviews(record, reviews);
+
+  if (currentReviews.some((review) => review.decision === "non_endorsed")) {
     return "DISPUTED";
   }
 
